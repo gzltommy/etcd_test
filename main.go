@@ -131,16 +131,16 @@ func main() {
 
 		// （2）设置续租（续租就相当于是“心跳”）
 		ctx, cancelFunc := context.WithCancel(context.Background())
-		leaseRespChan, err := cli.KeepAlive(ctx, leaseID)
+		keepAliveChan, err := cli.KeepAlive(ctx, leaseID)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// （3）监听租约
+		// （3）监听续租
 		go func() {
 			for {
 				select {
-				case leaseKeepResp := <-leaseRespChan:
+				case leaseKeepResp := <-keepAliveChan:
 					if leaseKeepResp == nil {
 						log.Printf("已经关闭续租功能\n")
 						return
@@ -171,7 +171,7 @@ func main() {
 		}
 		log.Printf("%v\n", putResp.Header)
 
-		// （6）关闭续租
+		// （6）关闭续租功能
 		cancelFunc()
 
 		time.Sleep(2 * time.Second)
